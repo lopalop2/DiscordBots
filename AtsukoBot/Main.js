@@ -14,6 +14,7 @@ logger.level = 'debug';
 var bot = new Discord.Client();
 var count = 0;
 var videoQueue = [];
+var q = 0;
 
 bot.login(auth.token);
 bot.on('ready', () => {
@@ -51,10 +52,10 @@ bot.on('message', message => {
                 {     
                 message.member.voiceChannel.join().then(connection => 
                     { // Connection is an instance of VoiceConnection
-                        const stream = ytdl(variable, {filter : 'audioonly'});
                         try{
+                        stream = ytdl(variable, {filter : 'audioonly'});
                         
-                        const dispatcher = connection.playStream(stream);
+                        dispatcher = connection.playStream(stream);
                         
                         dispatcher.setVolume(.05);
                         }
@@ -62,6 +63,38 @@ bot.on('message', message => {
                     }
                 )
              }
+            break;
+
+            case 'queue':
+                if(bot.voiceConnections.first())
+                    {
+                        try{
+                            videoQueue[videoQueue.length] = variable;
+                            if(videoQueue.length == 1)
+                                {
+                                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});
+                                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                                    dispatcher.setVolume(.05);
+                                }
+                        } 
+                        catch(err){}   
+
+                    }
+            break;
+            case 'next':
+                q++;
+                if(q >= videoQueue.length){
+                    q = 0;
+                    videoQueue = [];
+                    break;
+                }
+                try{
+                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
+                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                    dispatcher.setVolume(.05);
+                }
+                catch(err){}
+
             break;
 			
 			//help
