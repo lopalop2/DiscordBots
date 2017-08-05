@@ -55,12 +55,24 @@ bot.on('message', message => {
                             message.channel.send(print, {tts: true});
                         });
                     break;
+                    case 'roll':
+                    var dice = variable.split('d');
+                  
+                    var ret = 0;
+                    for(i = 0; i < dice[0]; i++)
+                        {
+                            var die = Math.floor((Math.random() * 100) % dice[1]);
+                            message.channel.send('die ' + (i+1) + ': ' +  die);
+                            ret += die;
+                        }
+                    message.channel.send(ret);
+                    break;
                     case 'mushroom':
                             message.channel.send('');
                     break;
                     default:
                    
-                            break;
+                    break;
 
          }
      }
