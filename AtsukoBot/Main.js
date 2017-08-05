@@ -152,3 +152,21 @@ bot.on('message', message => {
          }
      }
 });
+
+bot.on('guildMemberSpeaking', function(member, speaking) 
+{
+    if(member.user.username == 'RecordBot' && speaking == false)
+        {
+            q++;
+                if(q >= videoQueue.length){
+                    q = 0;
+                    videoQueue = [];
+                }
+                try{
+                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
+                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                    dispatcher.setVolume(.05);
+                }
+                catch(err){}
+        }
+});
