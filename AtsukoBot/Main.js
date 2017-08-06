@@ -15,6 +15,7 @@ var bot = new Discord.Client();
 var count = 0;
 var videoQueue = [];
 var q = 0;
+var curStream;
 
 bot.login(auth.token);
 bot.on('ready', () => {
@@ -54,7 +55,7 @@ bot.on('message', message => {
                     { // Connection is an instance of VoiceConnection
                         try{
                         stream = ytdl(variable, {filter : 'audioonly'});
-                        
+                        curStream = variable;
                         dispatcher = connection.playStream(stream);
                         
                         dispatcher.setVolume(.05);
@@ -73,6 +74,7 @@ bot.on('message', message => {
                             if(videoQueue.length == 1)
                                 {
                                     stream = ytdl(videoQueue[q], {filter : 'audioonly'});
+                                    curStream = videoQueue[q];
                                     dispatcher = bot.voiceConnections.first().playStream(stream);          
                                     dispatcher.setVolume(.05);
                                 }
@@ -89,12 +91,40 @@ bot.on('message', message => {
                     break;
                 }
                 try{
-                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
+                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});  
+                    curStream = videoQueue[q];                      
                     dispatcher = bot.voiceConnections.first().playStream(stream);          
                     dispatcher.setVolume(.05);
                 }
                 catch(err){}
 
+            break;
+             case 'pause':
+                try{
+                    if(!bot.voiceConnections.first().player.dispatcher.paused)
+                        bot.voiceConnections.first().player.dispatcher.pause();
+                    else
+                        bot.voiceConnections.first().player.dispatcher.resume();
+                }
+                catch(err){}
+
+            break;
+
+            case 'airhorn':
+            try{
+                    if(!  bot.voiceConnections.first())
+                        message.member.voiceChannel.join().then(connection => {});
+                    curTime = bot.voiceConnections.first().player.dispatcher.time;
+                    stream = ytdl('https://www.youtube.com/watch?v=OFr74zI1LBM', {filter : 'audioonly'});                        
+                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                    dispatcher.setVolume(.1);
+                    setTimeout(function(){
+                        stream = ytdl(curStream, {filter : 'audioonly'});                        
+                        bot.voiceConnections.first().playStream(stream, {seek: curTime * .001});  
+                        bot.voiceConnections.first().player.dispatcher.setVolume(.1);
+                                                        
+                    }, 5000);
+            }catch(err){}
             break;
 			
 			//help
@@ -117,9 +147,9 @@ bot.on('message', message => {
             
             break;
 
-           // case 'volume':
-            //dispatch.setVolume(variable);
-           // break;
+            case 'volume':
+                   bot.voiceConnections.first().player.dispatcher.setVolume(variable * .1);
+            break;
 
             case 'record':
             break;

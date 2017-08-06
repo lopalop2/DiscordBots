@@ -61,19 +61,22 @@ bot.on('message', message => {
                     var ret = 0;
                     for(i = 0; i < dice[0]; i++)
                         {
-                            var die = Math.floor((Math.random() * 100) % dice[1]);
-                            message.channel.send('die ' + (i+1) + ': ' +  die);
+                            var die = Math.floor(((Math.random() * 100) % (dice[1] - 1)) + 1);
+                            message.reply('\ndie ' + (i+1) + ': ' +  die);
                             ret += die;
                         }
-                    message.channel.send(ret);
+                    message.reply('\n' + ret);
                     break;
                     case 'mushroom':
                             message.channel.send('');
                     break;
                     default:
-                   
+                        message.channel.send('Commands:\n!setTime -- sets time for D&D\n!time -- tells time for D&D\n!roll xdy-- rolls y dice, x times');
                     break;
 
          }
+               
      }
+        //  if(message.member.user.id == 342456832268173323)
+        //                     message.reply('You fucking thot')
 });
