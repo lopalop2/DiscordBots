@@ -70,8 +70,32 @@ bot.on('message', message => {
                     case 'mushroom':
                             message.channel.send('');
                     break;
+                    case 'saveSheet':
+                        if(!message.attachments.first())
+                            break;
+                        fs.writeFile('sheets\\' + message.member.id, message.attachments.first().url); 
+                        message.reply('Saved file');
+                    break;
+                    case 'sheet':
+                    try{
+                       fs.readFile('sheets\\' + message.member.id,function(err, buffer){
+                            var print = new String();
+                            buffer.forEach(function(char) {
+                                print += String.fromCharCode(char);
+                            }, this);
+                            message.reply(print);
+                        });
+                    }catch(err){}
+                    break;
+                    case 'help':
+                        message.channel.send('Commands:\n' + 
+                        '!setTime -- sets time for D&D\n' +
+                         '!time -- tells time for D&D\n' +
+                         '!roll xdy-- rolls y dice, x times\n' +
+                        '!saveSheet -- saves attachment\n' +
+                        '!sheet -- sends attachment');
+                    break;
                     default:
-                        message.channel.send('Commands:\n!setTime -- sets time for D&D\n!time -- tells time for D&D\n!roll xdy-- rolls y dice, x times');
                     break;
 
          }
