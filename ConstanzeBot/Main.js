@@ -83,7 +83,7 @@ bot.on('message', message => {
                             buffer.forEach(function(char) {
                                 print += String.fromCharCode(char);
                             }, this);
-                            message.reply(print);
+                            message.channel.sendFile(print);
                         });
                     }catch(err){}
                     break;

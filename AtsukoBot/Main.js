@@ -150,8 +150,19 @@ bot.on('message', message => {
             case 'volume':
                    bot.voiceConnections.first().player.dispatcher.setVolume(variable * .1);
             break;
-
+                
             case 'record':
+                const receiver = bot.voiceConnections.first().createReceiver();
+                const PCMstream = receiver.createPCMStream(message.member);
+                const writeStream = fs.createWriteStream('recordTest.PCM');
+                PCMstream.pipe(writeStream);
+
+            break;
+            case 'resumeRecord':
+                //PCMstream.resume();
+             break;
+            case 'pauseRecord':
+                //PCMstream.pause();
             break;
 
 			case 'disconnect':
