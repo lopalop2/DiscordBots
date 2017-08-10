@@ -44,13 +44,13 @@ bot.on('message', message => {
         }, this);
        
         args = args.splice(1);
-        var targChannel = 1;
+        var targChannel = 0;
         var mustConnect = true;
         if (message.member.voiceChannel) 
             {
             for(i = 0; i < bot.voiceConnections.array().length; i++)
                 {
-                    if(bot.voiceConnections.array()[i] == message.member.voiceChannel){
+                    if(bot.voiceConnections.array()[i].channel == message.member.voiceChannel){
                         targChannel = i;
                         mustConnect = false;
                         break;
@@ -193,20 +193,19 @@ bot.on('message', message => {
                                 message.reply('Volume set to ' + variable * .1);
             break;
                 
-            case 'record':
-                const receiver = bot.voiceConnections.array()[targChannel].createReceiver();
-                //bot.voiceConnections.array()[targChannel].channel.members.array(); //-------------Record All
-                const PCMstream = receiver.createPCMStream(message.member);
-                const writeStream = fs.createWriteStream('recordTest.PCM');
-                PCMstream.pipe(writeStream);
+            // case 'record':
+            // if(!mustConnect)
+            //    rec(message,targChannel);
+            // else
+            //     message.reply('You must construct additonal pylons');
 
-            break;
-            case 'resumeRecord':
-                //PCMstream.resume();
-             break;
-            case 'pauseRecord':
-                //PCMstream.pause();
-            break;
+            // break;
+            // case 'resumeRecord':
+            //     //PCMstream.resume();
+            //  break;
+            // case 'pauseRecord':
+            //     //PCMstream.pause();
+            // break;
 
 			case 'disconnect':
              bot.voiceConnections.array()[targChannel].disconnect();
@@ -237,6 +236,20 @@ bot.on('message', message => {
          }
      }
 });
+
+function rec(message, targChannel)
+{
+    try{
+                const receiver = bot.voiceConnections.array()[targChannel].createReceiver();
+                //bot.voiceConnections.array()[targChannel].channel.members.array(); //-------------Record All
+                const PCMstream = receiver.createPCMStream(message.member);
+                const writeStream = fs.createWriteStream('recordTest.PCM');
+                PCMstream.pipe(writeStream);
+                message.reply('Recording');
+    }catch(err){
+        message.reply(err);
+    }
+}
 
 // bot.on('guildMemberSpeaking', function(member, speaking) 
 // {
