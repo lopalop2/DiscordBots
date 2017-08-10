@@ -34,6 +34,7 @@ bot.on('message', message => {
         var cmd = args[0];
         var variable = '';
         var once = false;
+        var vol = 1;
         args.forEach(function(element) {
             if(!once){
                 once = true;
@@ -43,6 +44,23 @@ bot.on('message', message => {
         }, this);
        
         args = args.splice(1);
+        var targChannel = 1;
+        var mustConnect = true;
+        if (message.member.voiceChannel) 
+            {
+            for(i = 0; i < bot.voiceConnections.array().length; i++)
+                {
+                    if(bot.voiceConnections.array()[i] == message.member.voiceChannel){
+                        targChannel = i;
+                        mustConnect = false;
+                        break;
+                }
+                    }
+            }
+                if(!mustConnect)
+                    {
+                        vol = bot.voiceConnections.array()[targChannel].player.dispatcher.volume * .1;
+                    }
         switch(cmd) {
             // !ping
             case 'ping':
@@ -51,37 +69,47 @@ bot.on('message', message => {
              case 'pong':
                     if (message.member.voiceChannel) 
                 {     
-                message.member.voiceChannel.join().then(connection => 
-                    { // Connection is an instance of VoiceConnection
+                if(mustConnect){
+                    message.member.voiceChannel.join();
+                    targChannel = bot.voiceConnections.array().length - 1;
+                }
+            }
+                     // Connection is an instance of VoiceConnection
                         try{
                         stream = ytdl(variable, {filter : 'audioonly'});
                         curStream = variable;
-                        dispatcher = connection.playStream(stream);
-                        
-                        dispatcher.setVolume(.05);
+                        dispatcher = bot.voiceConnections.array()[targChannel].playStream(stream);
+                        if(mustConnect)
+                            dispatcher.setVolume(.05);
+                        else
+                            dispatcher.setVolume(vol);  
+                            
                         }
                     catch(err){}
-                    }
-                )
-             }
             break;
 
             case 'queue':
-                if(bot.voiceConnections.first())
-                    {
+            if(mustConnect){
+                    message.member.voiceChannel.join();
+                    targChannel = bot.voiceConnections.array().length - 1;
+                }
                         try{
                             videoQueue[videoQueue.length] = variable;
                             if(videoQueue.length == 1)
                                 {
                                     stream = ytdl(videoQueue[q], {filter : 'audioonly'});
                                     curStream = videoQueue[q];
-                                    dispatcher = bot.voiceConnections.first().playStream(stream);          
-                                    dispatcher.setVolume(.05);
+                                    dispatcher = bot.voiceConnections.array()[targChannel].playStream(stream);          
+                                    if(mustConnect)
+                            dispatcher.setVolume(.05);
+                        else
+                            dispatcher.setVolume(vol);  
                                 }
+                                message.reply('Queued');
                         } 
                         catch(err){}   
 
-                    }
+                    
             break;
             case 'next':
                 q++;
@@ -93,18 +121,29 @@ bot.on('message', message => {
                 try{
                     stream = ytdl(videoQueue[q], {filter : 'audioonly'});  
                     curStream = videoQueue[q];                      
-                    dispatcher = bot.voiceConnections.first().playStream(stream);          
-                    dispatcher.setVolume(.05);
+                    dispatcher = bot.voiceConnections.array()[targChannel].playStream(stream);          
+                    if(mustConnect)
+                            dispatcher.setVolume(.05);
+                        else
+                            dispatcher.setVolume(vol);  
+                                
                 }
                 catch(err){}
+                message.reply('Skipped to next song');
 
             break;
              case 'pause':
+             if(!mustConnect)
                 try{
-                    if(!bot.voiceConnections.first().player.dispatcher.paused)
-                        bot.voiceConnections.first().player.dispatcher.pause();
+                    if(!bot.voiceConnections.array()[targChannel].player.dispatcher.paused){
+                        bot.voiceConnections.array()[targChannel].player.dispatcher.pause();
+                                message.reply('Paused');
+                    }
                     else
-                        bot.voiceConnections.first().player.dispatcher.resume();
+                        {
+                        bot.voiceConnections.array()[targChannel].player.dispatcher.resume();
+                                message.reply('Resumed');
+                        }
                 }
                 catch(err){}
 
@@ -112,16 +151,18 @@ bot.on('message', message => {
 
             case 'airhorn':
             try{
-                    if(!  bot.voiceConnections.first())
-                        message.member.voiceChannel.join().then(connection => {});
-                    curTime = bot.voiceConnections.first().player.dispatcher.time;
+                    if(mustConnect){
+                    message.member.voiceChannel.join();
+                    targChannel = bot.voiceConnections.array().length - 1;
+                }
+                    curTime = bot.voiceConnections.array()[targChannel].player.dispatcher.time;
                     stream = ytdl('https://www.youtube.com/watch?v=OFr74zI1LBM', {filter : 'audioonly'});                        
-                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                    dispatcher = bot.voiceConnections.array()[targChannel].playStream(stream);          
                     dispatcher.setVolume(.1);
                     setTimeout(function(){
                         stream = ytdl(curStream, {filter : 'audioonly'});                        
-                        bot.voiceConnections.first().playStream(stream, {seek: curTime * .001});  
-                        bot.voiceConnections.first().player.dispatcher.setVolume(.1);
+                        bot.voiceConnections.array()[targChannel].playStream(stream, {seek: curTime * .001});  
+                        bot.voiceConnections.array()[targChannel].player.dispatcher.setVolume(.1);
                                                         
                     }, 5000);
             }catch(err){}
@@ -129,7 +170,7 @@ bot.on('message', message => {
 			
 			//help
             case 'help':
-            message.channel.sendMessage('You can: \n!ping -- pong \n!connect -- connects to voice \n!record -- begins recording');
+            //message.channel.sendMessage('You can: \n!ping -- pong \n!connect -- connects to voice \n!record -- begins recording');
             break;
             
             case 'connect':    
@@ -148,11 +189,13 @@ bot.on('message', message => {
             break;
 
             case 'volume':
-                   bot.voiceConnections.first().player.dispatcher.setVolume(variable * .1);
+                   bot.voiceConnections.array()[targChannel].player.dispatcher.setVolume(variable * .1);
+                                message.reply('Volume set to ' + variable * .1);
             break;
                 
             case 'record':
-                const receiver = bot.voiceConnections.first().createReceiver();
+                const receiver = bot.voiceConnections.array()[targChannel].createReceiver();
+                //bot.voiceConnections.array()[targChannel].channel.members.array(); //-------------Record All
                 const PCMstream = receiver.createPCMStream(message.member);
                 const writeStream = fs.createWriteStream('recordTest.PCM');
                 PCMstream.pipe(writeStream);
@@ -166,7 +209,8 @@ bot.on('message', message => {
             break;
 
 			case 'disconnect':
-             bot.voiceConnections.first().disconnect();
+             bot.voiceConnections.array()[targChannel].disconnect();
+                                message.reply('Disconnected from voice channel');
             break;
             
             case 'hi':
@@ -194,20 +238,20 @@ bot.on('message', message => {
      }
 });
 
-bot.on('guildMemberSpeaking', function(member, speaking) 
-{
-    if(member.user.username == 'RecordBot' && speaking == false)
-        {
-            q++;
-                if(q >= videoQueue.length){
-                    q = 0;
-                    videoQueue = [];
-                }
-                try{
-                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
-                    dispatcher = bot.voiceConnections.first().playStream(stream);          
-                    dispatcher.setVolume(.05);
-                }
-                catch(err){}
-        }
-});
+// bot.on('guildMemberSpeaking', function(member, speaking) 
+// {
+//     if(member.user.username == 'RecordBot' && speaking == false)
+//         {
+//             q++;
+//                 if(q >= videoQueue.length){
+//                     q = 0;
+//                     videoQueue = [];
+//                 }
+//                 try{
+//                     stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
+//                     dispatcher = bot.voiceConnections.first().playStream(stream);          
+//                     dispatcher.setVolume(.05);
+//                 }
+//                 catch(err){}
+//         }
+// });
