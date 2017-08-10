@@ -42,6 +42,7 @@ bot.on('message', message => {
                     case 'bugReport':
                     try{
                         fs.appendFile('bugLog.txt', variable + '\n');
+                        message.reply('Bug Reported');
                     }catch(err){}
                     break;
                     default:

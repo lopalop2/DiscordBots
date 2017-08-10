@@ -1,2 +1,10 @@
 I need to make the bots tell people when theyve succesfully done something it it isnt obvious 
 For example this 
+
+ 
+Akkos record is broken 
+Most dialogue is inconstent with the characters 
+Akko still does not auto play the queue 
+
+each channel should have its own queue 
+airhorn returns to whatever song was most recently started 
