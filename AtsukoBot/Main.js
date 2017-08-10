@@ -70,6 +70,8 @@ bot.on('message', message => {
                     if (message.member.voiceChannel) 
                 {     
                 if(mustConnect){
+                     if(!message.member.voiceChannel)
+                    break;
                     message.member.voiceChannel.join();
                     targChannel = bot.voiceConnections.array().length - 1;
                 }
@@ -90,6 +92,8 @@ bot.on('message', message => {
 
             case 'queue':
             if(mustConnect){
+                if(!message.member.voiceChannel)
+                    break;
                     message.member.voiceChannel.join();
                     targChannel = bot.voiceConnections.array().length - 1;
                 }
@@ -109,7 +113,7 @@ bot.on('message', message => {
                         } 
                         catch(err){}   
 
-                    
+
             break;
             case 'next':
                 q++;
@@ -152,6 +156,8 @@ bot.on('message', message => {
             case 'airhorn':
             try{
                     if(mustConnect){
+                         if(!message.member.voiceChannel)
+                    break;
                     message.member.voiceChannel.join();
                     targChannel = bot.voiceConnections.array().length - 1;
                 }
@@ -251,7 +257,7 @@ function rec(message, targChannel)
     }
 }
 
-// bot.on('guildMemberSpeaking', function(member, speaking) 
+// bot.voiceConnections.array()[targChannel].on('guildMemberSpeaking', function(member, speaking) 
 // {
 //     if(member.user.username == 'RecordBot' && speaking == false)
 //         {
