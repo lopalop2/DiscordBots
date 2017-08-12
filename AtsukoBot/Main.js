@@ -16,6 +16,7 @@ var count = 0;
 var videoQueue = [];
 var q = 0;
 var curStream;
+var vol;
 
 bot.login(auth.token);
 bot.on('ready', () => {
@@ -34,7 +35,6 @@ bot.on('message', message => {
         var cmd = args[0];
         var variable = '';
         var once = false;
-        var vol = 1;
         args.forEach(function(element) {
             if(!once){
                 once = true;
@@ -57,10 +57,6 @@ bot.on('message', message => {
                 }
                     }
             }
-                if(!mustConnect)
-                    {
-                        vol = bot.voiceConnections.array()[targChannel].player.dispatcher.volume * .1;
-                    }
         switch(cmd) {
             // !ping
             case 'ping':
@@ -112,7 +108,22 @@ bot.on('message', message => {
                                 message.reply('Queued');
                         } 
                         catch(err){}   
-
+bot.voiceConnections.array()[targChannel].on("speaking", function(user, speaking){
+    if(user.username == 'RecordBot' && speaking == false)
+        {
+            q++;
+                if(q >= videoQueue.length){
+                    q = 0;
+                    videoQueue = [];
+                }
+                try{
+                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
+                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                    dispatcher.setVolume(.05);
+                }
+                catch(err){}
+        }
+});
 
             break;
             case 'next':
@@ -135,6 +146,20 @@ bot.on('message', message => {
                 catch(err){}
                 message.reply('Skipped to next song');
 
+            break;
+            case 'loop':
+                try{
+                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});  
+                    curStream = videoQueue[q];                      
+                    dispatcher = bot.voiceConnections.array()[targChannel].playStream(stream);          
+                    if(mustConnect)
+                            dispatcher.setVolume(.05);
+                        else
+                            dispatcher.setVolume(vol);  
+                                
+                }
+                catch(err){}
+                message.reply('Repeating current song');
             break;
              case 'pause':
              if(!mustConnect)
@@ -196,7 +221,8 @@ bot.on('message', message => {
 
             case 'volume':
                    bot.voiceConnections.array()[targChannel].player.dispatcher.setVolume(variable * .1);
-                                message.reply('Volume set to ' + variable * .1);
+                                message.reply('Volume set to ' + variable);
+                                vol = variable *.1;
             break;
                 
             // case 'record':
@@ -257,20 +283,21 @@ function rec(message, targChannel)
     }
 }
 
-// bot.voiceConnections.array()[targChannel].on('guildMemberSpeaking', function(member, speaking) 
-// {
-//     if(member.user.username == 'RecordBot' && speaking == false)
-//         {
-//             q++;
-//                 if(q >= videoQueue.length){
-//                     q = 0;
-//                     videoQueue = [];
-//                 }
-//                 try{
-//                     stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
-//                     dispatcher = bot.voiceConnections.first().playStream(stream);          
-//                     dispatcher.setVolume(.05);
-//                 }
-//                 catch(err){}
-//         }
-// });
+try{
+bot.voiceConnections.array()[targChannel].on("speaking", function(user, speaking){
+    if(user.username == 'RecordBot' && speaking == false)
+        {
+            q++;
+                if(q >= videoQueue.length){
+                    q = 0;
+                    videoQueue = [];
+                }
+                try{
+                    stream = ytdl(videoQueue[q], {filter : 'audioonly'});                        
+                    dispatcher = bot.voiceConnections.first().playStream(stream);          
+                    dispatcher.setVolume(.05);
+                }
+                catch(err){}
+        }
+});
+}catch(err){}
