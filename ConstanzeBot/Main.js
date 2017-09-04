@@ -59,9 +59,10 @@ bot.on('message', message => {
                     var dice = variable.split('d');
                   
                     var ret = 0;
+                    message.channel.send('Rolling ' + dice[0] + 'd' + dice[1] +  'for ' + message.author.username);
                     for(i = 0; i < dice[0]; i++)
                         {
-                            var die = Math.floor(((Math.random() * 100) % (dice[1] - 1)) + 1);
+                            var die = Math.floor(((Math.random() * 100) % (dice[1])) + 1);
                             if(die < dice[1] / 2)
                                 {
                                     if(Math.random() > .5)
@@ -72,7 +73,7 @@ bot.on('message', message => {
                             message.reply('\ndie ' + (i+1) + ': ' +  die);
                             ret += die;
                         }
-                    message.reply('\n' + ret);
+                    message.reply('\nSum: ' + ret);
                     break;
                     case 'mushroom':
                             message.channel.send('');
