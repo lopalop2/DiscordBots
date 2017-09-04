@@ -62,6 +62,13 @@ bot.on('message', message => {
                     for(i = 0; i < dice[0]; i++)
                         {
                             var die = Math.floor(((Math.random() * 100) % (dice[1] - 1)) + 1);
+                            if(die < dice[1] / 2)
+                                {
+                                    if(Math.random() > .5)
+                                        {
+                                            die *= 2;
+                                        }
+                                }
                             message.reply('\ndie ' + (i+1) + ': ' +  die);
                             ret += die;
                         }
