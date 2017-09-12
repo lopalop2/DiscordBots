@@ -16,7 +16,7 @@ var count = 0;
 var videoQueue = [];
 var q = 0;
 var curStream;
-var vol;
+var vol = 1;
 
 bot.login(auth.token);
 bot.on('ready', () => {
@@ -220,6 +220,7 @@ bot.voiceConnections.array()[targChannel].on("speaking", function(user, speaking
             break;
 
             case 'volume':
+            if(bot.voiceConnections.array().length > 0)
                    bot.voiceConnections.array()[targChannel].player.dispatcher.setVolume(variable * .1);
                                 message.reply('Volume set to ' + variable);
                                 vol = variable *.1;
@@ -239,9 +240,11 @@ bot.voiceConnections.array()[targChannel].on("speaking", function(user, speaking
             //     //PCMstream.pause();
             // break;
 
-			case 'disconnect':
+            case 'disconnect':
+            if(!mustConnect){
              bot.voiceConnections.array()[targChannel].disconnect();
                                 message.reply('Disconnected from voice channel');
+            }
             break;
             
             case 'hi':
